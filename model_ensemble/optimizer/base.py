@@ -1,10 +1,16 @@
 #
 # Optimizer class, designed for searching for optimal ensemble parameters
 #
+
+# import os, sys
+# sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+
 from ensembler import Ensembler as EnsemblerFamily
 from evaluator import Evaluator as EvaluatorFamily
 
+
 class Optimizer(object):
+
     def __init__(self, ensembler, evaluator):
         """
         Class initializer:
@@ -12,6 +18,10 @@ class Optimizer(object):
             ensembler: Ensembler object, which already loads predictions to be fused
             evaluator: Evaluator object
         """
+        print(ensembler)
+        print(EnsemblerFamily)
+        print(evaluator)
+        print(EvaluatorFamily)
         assert isinstance(ensembler, EnsemblerFamily)
         assert isinstance(evaluator, EvaluatorFamily)
 

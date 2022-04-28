@@ -12,6 +12,7 @@ Detection + Detection
 import os, sys
 sys.path.append('model_ensemble')
 from me_api import import_me_classes
+ModelEnsemble, ParameterClass = import_me_classes(mode='detection')
 from convert_format import load_pickle, dump_pickle, convert_format_lcz
 
 
@@ -62,7 +63,6 @@ def main():
 
     ##### Step 3. 使用Step 2中获取的最优超参来做模型融合 #####
     print('##### Step 3. 使用Step 2中获取的最优超参来做模型融合 #####')
-    ModelEnsemble, ParameterClass = import_me_classes(mode='detection')
     me = ModelEnsemble()
     me.initialize_parameter(
         parameter=ParameterClass.from_pickle(pickle_path=pickle_path)

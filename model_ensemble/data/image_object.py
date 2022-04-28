@@ -2,6 +2,9 @@
 # Image Object Class: managing image and instance objects
 #
 import numpy as np
+
+import os, sys
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 from me_utils import nms, compute_ioumat
 
 class ImageObject(object):
