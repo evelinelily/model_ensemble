@@ -9,15 +9,6 @@ from data import ImageObject, InstanceObject
 from evaluator import mApEvaluator, NgApEvaluator, PrecisionEvaluator, CustomizedmApEvaluator, CustomizedApEvaluator, RecallEvaluator
 from evaluator import Evaluator as EvaluatorBase
 from optimizer import RandomSearchOptimizer, PassiveOptimizer, BayesianOptimizer, GeneticOptimizer
-
-# 上面写法可以，但是下面写法会报错，原因待排查。
-# sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-# print(sys.path)
-# from model_ensemble.data import ImageObject, InstanceObject
-# from model_ensemble.evaluator import mApEvaluator, NgApEvaluator, PrecisionEvaluator, CustomizedmApEvaluator, CustomizedApEvaluator, RecallEvaluator
-# from model_ensemble.evaluator import Evaluator as EvaluatorBase
-# from model_ensemble.optimizer import RandomSearchOptimizer, PassiveOptimizer, BayesianOptimizer, GeneticOptimizer
-
 import numpy as np
 import copy
 
