@@ -3,7 +3,7 @@
 import os
 import sys
 
-from utils.data_processing import load_pickle, dump_pickle, filter_scores, convert_format_me
+from utils.data_processing import load_pickle, dump_pickle, filter_scores, convert_format_me, convert_format_det
 from me_methods import get_me_classes
 
 
@@ -75,12 +75,12 @@ class MatrixEnsemble(object):
         self.model_ensemble.initialize_parameter(parameter=self.optimal_param)
 
     def fuse(self, pred_1, pred_2):
-        """融合单张图片的预测结果
+        """融合单张图片的预测结果。注意：输入和输出数据均为正常的目标检测格式，即每个实例为[x1, y1, x2, y2, score, class_id]。
         """
         if not self.optimal_param:
             raise ValueError('最优融合超参数为None，无法做结果融合！')
         pred_1 = convert_format_me([pred_1], self.class_id_list)[0]
         pred_2 = convert_format_me([pred_2], self.class_id_list)[0]
-        return self.model_ensemble.fuse(pred_1, pred_2)
-    
-
+        pred_fused = self.model_ensemble.fuse(pred_1, pred_2)
+        pred_fused = convert_format_det([pred_fused])[0]
+        return pred_fused

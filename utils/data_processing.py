@@ -36,10 +36,9 @@ def add_ok_prob(preds):
     return preds_out
 
 
-def convert_format_lcz(res):
-    """Convert the data format from me_api to lcz.
+def convert_format_det(res):
+    """Convert the data format from me to normal detection.
     """
-
     res_new = []
     for res_per_img in res:
         res_per_img_new = []
