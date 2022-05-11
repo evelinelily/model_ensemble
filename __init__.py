@@ -1,1 +1,1 @@
-from .me_api import import_me_classes
+from .me_methods import get_me_classes

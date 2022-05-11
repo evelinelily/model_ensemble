@@ -1,16 +1,17 @@
 #
-# Model Ensemble API
+# Model ensemble methods
 #
 
-import os, sys
+import os
+import sys
+import copy
+import numpy as np
 
-sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'model_ensemble'))
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__))))
 from data import ImageObject, InstanceObject
 from evaluator import mApEvaluator, NgApEvaluator, PrecisionEvaluator, CustomizedmApEvaluator, CustomizedApEvaluator, RecallEvaluator
 from evaluator import Evaluator as EvaluatorBase
 from optimizer import RandomSearchOptimizer, PassiveOptimizer, BayesianOptimizer, GeneticOptimizer
-import numpy as np
-import copy
 
 all_metrics = {
     'mAP': mApEvaluator,
@@ -448,19 +449,19 @@ class HybridModelEnsemble(DetectionModelEnsemble):
 
 
 ### 指定融合模式接口函数 ###
-def import_me_classes(mode):
+def get_me_classes(fusion_type):
     """
     指定融合模式，目前共支持4种："detection", "multi-class", "multi-label"，"hybrid"。
 
     """
     if None: pass
-    elif mode == 'detection':
+    elif fusion_type == 'detection':
         return DetectionModelEnsemble, DetectionParam
-    elif mode == 'multi-class':
+    elif fusion_type == 'multi-class':
         return MultiClassModelEnsemble, MultiClassParam
-    elif mode == 'multi-label':
+    elif fusion_type == 'multi-label':
         return MultiLabelModelEnsemble, MultiLabelParam
-    elif mode == 'hybrid':
+    elif fusion_type == 'hybrid':
         return HybridModelEnsemble, HybridParam
     else:
         raise NotImplementedError

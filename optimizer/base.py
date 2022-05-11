@@ -18,10 +18,6 @@ class Optimizer(object):
             ensembler: Ensembler object, which already loads predictions to be fused
             evaluator: Evaluator object
         """
-        print(ensembler)
-        print(EnsemblerFamily)
-        print(evaluator)
-        print(EvaluatorFamily)
         assert isinstance(ensembler, EnsemblerFamily)
         assert isinstance(evaluator, EvaluatorFamily)
 

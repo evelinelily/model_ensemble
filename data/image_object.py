@@ -4,10 +4,13 @@
 import numpy as np
 
 import os, sys
+
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 from me_utils import nms, compute_ioumat
 
+
 class ImageObject(object):
+
     def __init__(self, image_name, instance_object_list):
         assert isinstance(instance_object_list, list)
         self.image_name = image_name
@@ -48,12 +51,12 @@ class ImageObject(object):
 
         all_xyxys = self.xyxys
         all_dists = self.dists
-        num_fg_classes = all_dists.shape[1]-1
+        num_fg_classes = all_dists.shape[1] - 1
 
-        outstanding_fg_class_ids = np.argmax(all_dists[:,1:], axis=1) + 1
+        outstanding_fg_class_ids = np.argmax(all_dists[:, 1:], axis=1) + 1
 
         nms_selected_ids = list()
-        for class_id in range(1,num_fg_classes+1):
+        for class_id in range(1, num_fg_classes + 1):
             inst_ids = np.where(outstanding_fg_class_ids == class_id)[0]
             xyxys = all_xyxys[inst_ids, :]
             dists = all_dists[inst_ids, :]
@@ -74,6 +77,6 @@ class ImageObject(object):
 
         ioumat = compute_ioumat(self.xyxys, obj.xyxys)
         ioumat_overlap = np.zeros_like(ioumat)
-        ioumat_overlap[ioumat==1.] = 1
+        ioumat_overlap[ioumat == 1.] = 1
 
         return np.all(ioumat_overlap.sum(axis=0) == 1) and np.all(ioumat_overlap.sum(axis=1) == 1)
