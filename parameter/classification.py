@@ -37,7 +37,7 @@ class ClassificationParam(ParamManager):
             bounds: A list of tuples (Nones if no boundaries are required) that lists the corresponding boundaries, like: [(low1, hight), (low2, high2), ...]
         """
         # code = self.dist_weights.flatten().tolist()
-        code = self.dist_weights
+        code = np.array(self.dist_weights).flatten().tolist()
         bounds = [(0, 1)] * (self.num_models * self.num_classes)
         return code, bounds
 
@@ -47,7 +47,7 @@ class ClassificationParam(ParamManager):
         """
         assert self.check_code(code)
         # self.dist_weights = np.array(code).reshape([self.num_models, self.num_classes])
-        self.dist_weights = code
+        self.dist_weights = np.array(code).reshape([self.num_models, self.num_classes]).tolist()
 
 
 class MultiClassParam(ClassificationParam):

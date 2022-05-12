@@ -8,6 +8,7 @@ import numpy as np
 import copy
 from .base import Ensembler
 
+
 class ClassificationEnsembler(Ensembler):
     param = None
 
@@ -24,7 +25,9 @@ class ClassificationEnsembler(Ensembler):
             a new ImageObject instance after the model ensemble
         """
         assert len(image_predictions) > 1
-        assert len(image_predictions) == self.param.num_models, "#model inputs mismatch with the parameter: {} vs {}".format(len(image_predictions), self.param.num_models)
+        assert len(
+            image_predictions) == self.param.num_models, "#model inputs mismatch with the parameter: {} vs {}".format(
+                len(image_predictions), self.param.num_models)
         image_pred0 = image_predictions[0]
         fused_distribution = None
         for iModel, image_pred in enumerate(image_predictions):
@@ -42,7 +45,7 @@ class ClassificationEnsembler(Ensembler):
             if fused_distribution is not None:
                 fused_distribution += class_weights * distribution
             else:
-                fused_distribution  = class_weights * distribution
+                fused_distribution = class_weights * distribution
 
         distribution = self.normalize_distribution(distribution)
         instance_object_fused = InstanceObject(box=box, distribution=fused_distribution)
@@ -52,6 +55,7 @@ class ClassificationEnsembler(Ensembler):
 
 
 class MultiClassEnsembler(ClassificationEnsembler):
+
     def __init__(self, param, model_predictions):
         """ 
         Initialize ensembler
@@ -59,15 +63,14 @@ class MultiClassEnsembler(ClassificationEnsembler):
             param: parameter object for this ensembler
             predictions: a list of DataManager objects, represents DNN outputs from multiple models to be ensembled
         """
-        assert all([isinstance(model_pred, MultiClassData) for model_pred in model_predictions]), "All model prediction must be a MultiClass predictions"
+        assert all([isinstance(model_pred, MultiClassData)
+                    for model_pred in model_predictions]), "All model prediction must be a MultiClass predictions"
         assert isinstance(param, MultiClassParam), "param must be a MultiClass parameter object"
 
         super(MultiClassEnsembler, self).__init__(model_predictions)
         self.param = param
         self.param.initialize_weights(  # classification model only
-            num_classes=model_predictions[0].class_num,
-            num_models=len(model_predictions)
-        )
+            num_classes=model_predictions[0].class_num, num_models=len(model_predictions))
 
     def normalize_distribution(self, distribution_unormalized):
         """ whether normalize sum(distribution) to 1 after fusion """
@@ -80,6 +83,7 @@ class MultiClassEnsembler(ClassificationEnsembler):
 
 
 class MultiLabelEnsembler(ClassificationEnsembler):
+
     def __init__(self, param, model_predictions):
         """ 
         Initialize ensembler
@@ -87,15 +91,14 @@ class MultiLabelEnsembler(ClassificationEnsembler):
             param: parameter object for this ensembler
             predictions: a list of DataManager objects, represents DNN outputs from multiple models to be ensembled
         """
-        assert all([isinstance(model_pred, MultiLabelData) for model_pred in model_predictions]), "All model prediction must be a MultiLabel predictions"
+        assert all([isinstance(model_pred, MultiLabelData)
+                    for model_pred in model_predictions]), "All model prediction must be a MultiLabel predictions"
         assert isinstance(param, MultiLabelParam), "param must be a MultiLabel parameter object"
 
         super(MultiLabelEnsembler, self).__init__(model_predictions)
         self.param = param
         self.param.initialize_weights(  # classification model only
-            num_classes=model_predictions[0].class_num,
-            num_models=len(model_predictions)
-        )
+            num_classes=model_predictions[0].class_num, num_models=len(model_predictions))
 
     def normalize_distribution(self, distribution_unormalized):
         """ whether normalize sum(distribution) to 1 after fusion """

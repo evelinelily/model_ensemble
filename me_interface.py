@@ -8,7 +8,11 @@ class MatrixEnsemble(object):
     def __init__(self, fusion_type, class_id_list=None):
         self.fusion_type = fusion_type
         self.class_id_list = class_id_list
-        self.ModelEnsemble, self.ParameterClass = get_me_classes(self.fusion_type)
+        # 多类别和多标签分类都统一到multilabel上
+        if fusion_type == 'classification':
+            self.ModelEnsemble, self.ParameterClass = get_me_classes('multi-label')
+        else:
+            self.ModelEnsemble, self.ParameterClass = get_me_classes(self.fusion_type)
         self.model_ensemble = self.ModelEnsemble()
         self.optimal_param = None
 
@@ -34,14 +38,15 @@ class MatrixEnsemble(object):
         pred_1 = load_pickle(path_pred_1)
         pred_2 = load_pickle(path_pred_2)
         gt = load_pickle(path_gt)
-        pred_1 = filter_scores(pred_1)
-        pred_2 = filter_scores(pred_2)
         # 将输入数据转换成me的格式
         if self.fusion_type == 'detection':
+            pred_1 = filter_scores(pred_1)
+            pred_2 = filter_scores(pred_2)
             pred_1 = convert_format_me(pred_1, self.class_id_list)
             pred_2 = convert_format_me(pred_2, self.class_id_list)
             gt = convert_format_me(gt, self.class_id_list)
         if self.fusion_type == 'hybrid':
+            pred_1 = filter_scores(pred_1)
             pred_1 = convert_format_me(pred_1, self.class_id_list)
             gt = convert_format_me(gt, self.class_id_list)
         # 初始化优化器
@@ -68,8 +73,11 @@ class MatrixEnsemble(object):
             param['lonely_fg_weight1'] = self.optimal_param.lonely_fg_weight1
             param['lonely_fg_weight2'] = self.optimal_param.lonely_fg_weight2
             param['dist_weights'] = self.optimal_param.dist_weights
+            param['num_classes'] = self.optimal_param.num_classes
         else:  # classification、hybrid都当做classification处理
             param['dist_weights'] = self.optimal_param.dist_weights
+            param['num_classes'] = self.optimal_param.num_classes
+            param['num_models'] = self.optimal_param.num_models
         dump_json(param, output_path)
 
     def load_param(self, param_path):
@@ -83,8 +91,12 @@ class MatrixEnsemble(object):
             self.optimal_param.lonely_fg_weight1 = param['lonely_fg_weight1']
             self.optimal_param.lonely_fg_weight2 = param['lonely_fg_weight2']
             self.optimal_param.dist_weights = param['dist_weights']
+            self.optimal_param.num_classes = param['num_classes']
         else:  # classification、hybrid都当做classification处理
             self.optimal_param.dist_weights = param['dist_weights']
+            self.optimal_param.num_classes = param['num_classes']
+            self.optimal_param.num_models = param['num_models']
+
         self.model_ensemble.initialize_parameter(parameter=self.optimal_param)
 
     def fuse(self, pred_1, pred_2):
@@ -92,8 +104,13 @@ class MatrixEnsemble(object):
         """
         if not self.optimal_param:
             raise ValueError('最优融合超参数为None，无法做结果融合！')
-        pred_1 = convert_format_me([pred_1], self.class_id_list)[0]
-        pred_2 = convert_format_me([pred_2], self.class_id_list)[0]
-        pred_fused = self.model_ensemble.fuse(pred_1, pred_2)
-        pred_fused = convert_format_det([pred_fused])[0]
+        if self.fusion_type == 'detection':
+            pred_1 = convert_format_me([pred_1], self.class_id_list)[0]
+            pred_2 = convert_format_me([pred_2], self.class_id_list)[0]
+            pred_fused = self.model_ensemble.fuse(pred_1, pred_2)
+            pred_fused = convert_format_det([pred_fused])[0]
+        elif self.fusion_type == 'classification':
+            pred_fused = self.model_ensemble.fuse(pred_1, pred_2)
+        else:  # hybrid
+            pass
         return pred_fused
