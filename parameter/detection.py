@@ -1,10 +1,12 @@
 from .base import ParamManager
 import numpy as np
 
+
 class DetectionParam(ParamManager):
+
     def __init__(self):
         self.iou_threshold = .1
-        self.roi_weight    = .5
+        self.roi_weight = .5
         # Foreground weights for two detectors, respectively;
         # These weights are applied on foreground classes when the detected box doesnot overlap with anyother boxes
         self.lonely_fg_weight1 = .0
@@ -15,14 +17,16 @@ class DetectionParam(ParamManager):
         assert isinstance(num_classes, int)
         if not hasattr(self, 'dist_weights'):
             self.num_classes = num_classes
-            self.dist_weights  = .5 + np.zeros(num_classes)
+            self.dist_weights = [.5] * num_classes
 
     def dump(self):
-        print("Ensemble Parameters:")
-        print("lonely fg weights (det1/det2): {}/{}".format(self.lonely_fg_weight1, self.lonely_fg_weight2))
+        print("******************************* Ensemble Parameters: *******************************")
+        print("dist_weight per class: {}".format(self.dist_weights))
+        print("lonely_fg_weight1: {}".format(self.lonely_fg_weight1))
+        print("lonely_fg_weight2: {}".format(self.lonely_fg_weight2))
         print("iou_threshold: {}".format(self.iou_threshold))
         print("roi_weight: {}".format(self.roi_weight))
-        print("dist_weight per class: {}".format(self.dist_weights))
+        print("************************************************************************************")
 
     def encode(self):
         """ 
@@ -31,8 +35,8 @@ class DetectionParam(ParamManager):
             code: A list that enumerate all parameters in a fixed order
             bounds: A list of tuples (Nones if no boundaries are required) that lists the corresponding boundaries, like: [(low1, hight), (low2, high2), ...]
         """
-        code = [self.iou_threshold, self.roi_weight, self.lonely_fg_weight1, self.lonely_fg_weight2] + self.dist_weights.tolist()
-        bounds = [(0,.3), (0,1), (0,1), (0,1)] + [(0,1)]*self.num_classes
+        code = [self.iou_threshold, self.roi_weight, self.lonely_fg_weight1, self.lonely_fg_weight2] + self.dist_weights
+        bounds = [(0, .3), (0, 1), (0, 1), (0, 1)] + [(0, 1)] * self.num_classes
         return code, bounds
 
     def decode(self, code):
@@ -42,4 +46,4 @@ class DetectionParam(ParamManager):
         assert self.check_code(code)
 
         self.iou_threshold, self.roi_weight, self.lonely_fg_weight1, self.lonely_fg_weight2 = code[:4]
-        self.dist_weights = np.array(code[4:]).flatten()
+        self.dist_weights = code[4:]

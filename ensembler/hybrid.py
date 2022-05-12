@@ -8,7 +8,9 @@ import numpy as np
 import copy
 from .base import Ensembler
 
+
 class HybridEnsembler(Ensembler):
+
     def __init__(self, param, model_predictions):
         """ 
         Initialize ensembler
@@ -60,8 +62,9 @@ class HybridEnsembler(Ensembler):
             # fuse roi box
             box = copy.copy(instance_detection.box)
             # fuse distribution
-            distribution = instance_detection.distribution*self.param.dist_weights + dist_multilabel*(1.-self.param.dist_weights)
-            distribution = distribution / max(distribution.sum(), 1e-8)   # distribution normalize to 1
+            distribution = instance_detection.distribution * np.array(
+                self.param.dist_weights) + dist_multilabel * (1. - np.array(self.param.dist_weights))
+            distribution = distribution / max(distribution.sum(), 1e-8)  # distribution normalize to 1
             instance_object_list.append(InstanceObject(box=box, distribution=distribution))
 
         ## 2) form the fused results

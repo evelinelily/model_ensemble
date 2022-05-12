@@ -8,7 +8,9 @@ import numpy as np
 import copy
 from .base import Ensembler
 
+
 class DetectionEnsembler(Ensembler):
+
     def __init__(self, param, model_predictions):
         """ 
         Initialize ensembler
@@ -60,43 +62,35 @@ class DetectionEnsembler(Ensembler):
             instance_object1 = image_pred1.instance_object_list[id1]
             instance_object2 = image_pred2.instance_object_list[id2]
             # fuse roi box
-            box = tuple(
-                b1*self.param.roi_weight + b2*(1.-self.param.roi_weight) for b1, b2 in zip(instance_object1.box, instance_object2.box)
-            )
+            box = tuple(b1 * self.param.roi_weight + b2 * (1. - self.param.roi_weight)
+                        for b1, b2 in zip(instance_object1.box, instance_object2.box))
             # fuse distribution
-            distribution = instance_object1.distribution*self.param.dist_weights + instance_object2.distribution*(1.-self.param.dist_weights)
-            distribution = distribution / max(distribution.sum(), 1e-8)   # distribution normalize to 1
+            distribution = instance_object1.distribution * np.array(
+                self.param.dist_weights) + instance_object2.distribution * (1. - np.array(self.param.dist_weights))
+            distribution = distribution / max(distribution.sum(), 1e-8)  # distribution normalize to 1
             instance_object_list.append(InstanceObject(box=box, distribution=distribution))
 
         ## 2) deal with lonely (unoverlapped) predictions
         # 2.1) lonely predictions from detector1
         for ix in range(image_pred1.instance_num):
-            if not np.any(iou_mat[ix,:]):  # find lonely prediction
+            if not np.any(iou_mat[ix, :]):  # find lonely prediction
                 assert ix not in overlap_ids1
                 instance_object = image_pred1.instance_object_list[ix]
                 box = instance_object.box
                 fg_distribution = instance_object.distribution[1:] * self.param.lonely_fg_weight1
                 bg_distribution = 1. - fg_distribution.sum()
                 instance_object_list.append(
-                    InstanceObject(
-                        box=box,
-                        distribution=np.hstack([bg_distribution, fg_distribution])
-                    )
-                )
+                    InstanceObject(box=box, distribution=np.hstack([bg_distribution, fg_distribution])))
         # 2.2) lonely predictions from detector2
         for ix in range(image_pred2.instance_num):
-            if not np.any(iou_mat[:,ix]):  # find lonely prediction
+            if not np.any(iou_mat[:, ix]):  # find lonely prediction
                 assert ix not in overlap_ids2
                 instance_object = image_pred2.instance_object_list[ix]
                 box = instance_object.box
                 fg_distribution = instance_object.distribution[1:] * self.param.lonely_fg_weight2
                 bg_distribution = 1. - fg_distribution.sum()
                 instance_object_list.append(
-                    InstanceObject(
-                        box=box,
-                        distribution=np.hstack([bg_distribution, fg_distribution])
-                    )
-                )
+                    InstanceObject(box=box, distribution=np.hstack([bg_distribution, fg_distribution])))
 
         ## 3) form the fused results
         fused_image_object = ImageObject(image_pred1.image_name, instance_object_list)

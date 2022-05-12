@@ -1,13 +1,8 @@
 """MatrixEnsemble接口类"""
-
-import os
-import sys
-
-from utils.data_processing import load_pickle, dump_pickle, filter_scores, convert_format_me, convert_format_det
 from me_methods import get_me_classes
+from utils.data_processing import load_pickle, load_json, dump_json, filter_scores, convert_format_me, convert_format_det
 
 
-### 指定融合模式接口函数 ###
 class MatrixEnsemble(object):
 
     def __init__(self, fusion_type, class_id_list=None):
@@ -66,12 +61,30 @@ class MatrixEnsemble(object):
         """
         if not self.optimal_param:
             raise ValueError('最优融合超参数为None，请先执行optimization操作！')
-        dump_pickle(self.optimal_param, output_path)
+        param = dict()
+        if self.fusion_type == 'detection':
+            param['iou_threshold'] = self.optimal_param.iou_threshold
+            param['roi_weight'] = self.optimal_param.roi_weight
+            param['lonely_fg_weight1'] = self.optimal_param.lonely_fg_weight1
+            param['lonely_fg_weight2'] = self.optimal_param.lonely_fg_weight2
+            param['dist_weights'] = self.optimal_param.dist_weights
+        else:  # classification、hybrid都当做classification处理
+            param['dist_weights'] = self.optimal_param.dist_weights
+        dump_json(param, output_path)
 
-    def load_param(self, input_path):
+    def load_param(self, param_path):
         """将最优融合超参数加载到类中
         """
-        self.optimal_param = load_pickle(input_path)
+        param = load_json(param_path)
+        self.optimal_param = self.ParameterClass()
+        if self.fusion_type == 'detection':
+            self.optimal_param.iou_threshold = param['iou_threshold']
+            self.optimal_param.roi_weight = param['roi_weight']
+            self.optimal_param.lonely_fg_weight1 = param['lonely_fg_weight1']
+            self.optimal_param.lonely_fg_weight2 = param['lonely_fg_weight2']
+            self.optimal_param.dist_weights = param['dist_weights']
+        else:  # classification、hybrid都当做classification处理
+            self.optimal_param.dist_weights = param['dist_weights']
         self.model_ensemble.initialize_parameter(parameter=self.optimal_param)
 
     def fuse(self, pred_1, pred_2):

@@ -3,7 +3,6 @@ import time
 import copy
 import json
 import pickle
-import numpy as np
 
 
 def load_pickle(pickle_file):
@@ -14,6 +13,11 @@ def load_pickle(pickle_file):
 def dump_pickle(res, pickle_file):
     with open(pickle_file, 'wb') as fid:
         return pickle.dump(res, fid)
+
+
+def load_json(json_file):
+    with open(json_file, 'r') as fid:
+        return json.load(fid)
 
 
 def dump_json(res, json_file):
