@@ -109,7 +109,8 @@ class ModelEnsembleBase(object):
         # check image length
         num_images = len(ground_truth)
         assert all([len(x) == num_images
-                    for x in predictions_list]), "#samples of predictions and the ground truths unmatch"
+                    for x in predictions_list]), "#samples of predictions and the ground truths unmatch, {}, {}"\
+            .format(num_images, [len(x) for x in predictions_list])
 
         # convert parse input data
         image_object_dict_predictions = [dict()

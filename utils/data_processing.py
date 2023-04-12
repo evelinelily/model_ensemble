@@ -111,7 +111,6 @@ def filter_scores(result, score=0.05):
     Return:
         过滤后的y_pred。
     """
-
     cnt1, cnt2 = 0, 0
     result_new = []
     for res in result:
